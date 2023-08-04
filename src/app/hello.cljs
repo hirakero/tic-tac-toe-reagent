@@ -20,27 +20,28 @@
 
 #_(defn square [& {:keys [value on-click]}]
   [:button.square {:on-click on-click} value])
-(defn square []
-  (let [value (r/atom nil)]
-    (fn []
-      [:button.square
-       {:on-click #(reset! value "x")} 
-       @value])))
+(defn square [& {:keys [value on-click]}] 
+  [:button.square
+   {:on-click on-click}
+   value])
 
 (defn board []
- [:div
-  [:div.board-row
-   [square]
-   [square]
-   [square]]
-  [:div.board-row
-   [square]
-   [square]
-   [square]]
-  [:div.board-row
-   [square]
-   [square]
-   [square]]]
+  (let [squares (r/atom [1 2 3 4 5 6 7 8 9]#_(vec (repeat 9 nil)))
+        handle-click (fn [i] (swap! squares assoc i "x" ))]
+    (fn [] 
+      [:div
+       [:div.board-row
+        [square :value (get @squares 0) :on-click #(handle-click 0)]
+        [square :value (get @squares 1) :on-click #(handle-click 1)]
+        [square :value (get @squares 2) :on-click #(handle-click 2)]]
+       [:div.board-row
+        [square :value (get @squares 3) :on-click #(handle-click 3)]
+        [square :value (get @squares 4) :on-click #(handle-click 4)]
+        [square :value (get @squares 5) :on-click #(handle-click 5)]]
+       [:div.board-row
+        [square :value (get @squares 6) :on-click #(handle-click 6)]
+        [square :value (get @squares 7) :on-click #(handle-click 7)]
+        [square :value (get @squares 8) :on-click #(handle-click 8)]]]))
   )
 
 (defn hello []
