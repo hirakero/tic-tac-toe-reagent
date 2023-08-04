@@ -18,22 +18,25 @@
      [:div "status"]
      [:ol "todo"]]]])
 
-#_(defn sqare [& {:keys [value on-click]}]
+#_(defn square [& {:keys [value on-click]}]
   [:button.square {:on-click on-click} value])
+(defn square [& {:keys [value]}]
+  [:button.square value])
+
 (defn board []
  [:div
   [:div.board-row
-   [:button.square "1"]
-   [:button.square "2"]
-   [:button.square "3"]]
+   [square :value 1]
+   [square :value 2]
+   [square :value 3]]
   [:div.board-row
-   [:button.square "4"]
-   [:button.square "5"]
-   [:button.square "6"]]
+   [square :value 4]
+   [square :value 5]
+   [square :value 6]]
   [:div.board-row
-   [:button.square "7"]
-   [:button.square "8"]
-   [:button.square "9"]]]
+   [square :value 7]
+   [square :value 8]
+   [square :value 9]]]
   )
 
 (defn hello []
