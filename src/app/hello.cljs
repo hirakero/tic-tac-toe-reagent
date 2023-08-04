@@ -26,22 +26,27 @@
    value])
 
 (defn board []
-  (let [squares (r/atom [1 2 3 4 5 6 7 8 9]#_(vec (repeat 9 nil)))
-        handle-click (fn [i] (swap! squares assoc i "x" ))]
+  (let [state (r/atom {:squares (vec (repeat 9 nil))
+                       :x-is-next? true}) 
+        handle-click (fn [i] 
+                       (when-not (get-in @state [:squares i])
+                         (swap! state assoc-in [:squares i] (if (get @state :x-is-next?) "x" "o"))
+                         (swap! state update :x-is-next? not))
+                       )]
     (fn [] 
       [:div
        [:div.board-row
-        [square :value (get @squares 0) :on-click #(handle-click 0)]
-        [square :value (get @squares 1) :on-click #(handle-click 1)]
-        [square :value (get @squares 2) :on-click #(handle-click 2)]]
+        [square :value (get-in @state [:squares 0]) :on-click #(handle-click 0)]
+        [square :value (get-in @state [:squares 1]) :on-click #(handle-click 1)]
+        [square :value (get-in @state [:squares 2]) :on-click #(handle-click 2)]]
        [:div.board-row
-        [square :value (get @squares 3) :on-click #(handle-click 3)]
-        [square :value (get @squares 4) :on-click #(handle-click 4)]
-        [square :value (get @squares 5) :on-click #(handle-click 5)]]
+        [square :value (get-in @state [:squares 3]) :on-click #(handle-click 3)]
+        [square :value (get-in @state [:squares 4]) :on-click #(handle-click 4)]
+        [square :value (get-in @state [:squares 5]) :on-click #(handle-click 5)]]
        [:div.board-row
-        [square :value (get @squares 6) :on-click #(handle-click 6)]
-        [square :value (get @squares 7) :on-click #(handle-click 7)]
-        [square :value (get @squares 8) :on-click #(handle-click 8)]]]))
+        [square :value (get-in @state [:squares 6]) :on-click #(handle-click 6)]
+        [square :value (get-in @state [:squares 7]) :on-click #(handle-click 7)]
+        [square :value (get-in @state [:squares 8]) :on-click #(handle-click 8)]]]))
   )
 
 (defn hello []
