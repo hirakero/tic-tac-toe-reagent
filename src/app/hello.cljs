@@ -20,23 +20,27 @@
 
 #_(defn square [& {:keys [value on-click]}]
   [:button.square {:on-click on-click} value])
-(defn square [& {:keys [value]}]
-  [:button.square value])
+(defn square []
+  (let [value (r/atom nil)]
+    (fn []
+      [:button.square
+       {:on-click #(reset! value "x")} 
+       @value])))
 
 (defn board []
  [:div
   [:div.board-row
-   [square :value 1]
-   [square :value 2]
-   [square :value 3]]
+   [square]
+   [square]
+   [square]]
   [:div.board-row
-   [square :value 4]
-   [square :value 5]
-   [square :value 6]]
+   [square]
+   [square]
+   [square]]
   [:div.board-row
-   [square :value 7]
-   [square :value 8]
-   [square :value 9]]]
+   [square]
+   [square]
+   [square]]]
   )
 
 (defn hello []
