@@ -1,15 +1,6 @@
 (ns app.hello
   (:require [reagent.core :as r]))
 
-(defn click-counter [click-count]
-  [:div
-   "The atom " [:code "click-count"] " has value: "
-   @click-count ". "
-   [:input {:type "button" :value "Click me!"
-            :on-click #(swap! click-count inc)}]])
-
-(def click-count (r/atom 0))
-
 #_(defn game []
   [:div.game
    [:dib.game-board
@@ -18,8 +9,6 @@
      [:div "status"]
      [:ol "todo"]]]])
 
-#_(defn square [& {:keys [value on-click]}]
-  [:button.square {:on-click on-click} value])
 (defn square [& {:keys [value on-click]}] 
   [:button.square
    {:on-click on-click}
@@ -33,37 +22,34 @@
                [1 4 7]
                [2 5 8]
                [0 4 8]
-               [2 4 6]]] 
-     (some-> (filter (fn [[a b c]]
-                  (and (squares a)
-                       (= (squares a)
-                          (squares b)
-                          (squares c))))
-                lines)
-             first
-             (#(squares (first %)))) 
-    )
-  )
+               [2 4 6]]]
+    (some-> (filter (fn [[a b c]]
+                      (and (squares a)
+                           (= (squares a)
+                              (squares b)
+                              (squares c))))
+                    lines)
+            first
+            (#(squares (first %))))))
 (comment 
   (calcurate-winner [:o nil nil nil :o nil nil nil :o]) 
   (calcurate-winner [nil nil nil nil :o nil nil nil :o]))
 
 (defn board []
   (let [state (r/atom {:squares (vec (repeat 9 nil))
-                       :x-is-next? true}) 
-        handle-click (fn [i] 
-                       (when-not (or (get-in @state [:squares i])
-                                     (calcurate-winner (:squares @state)))
-                         (swap! state assoc-in [:squares i] (if (get @state :x-is-next?) "x" "o"))
-                         (swap! state update :x-is-next? not))
-                       )]
-    (fn [] 
-      (let [winner (calcurate-winner (:squares @state))
+                       :x-is-next? true})]
+    (fn []
+      (let [handle-click (fn [i]
+                           (when-not (or (get-in @state [:squares i])
+                                         (calcurate-winner (:squares @state)))
+                             (swap! state assoc-in [:squares i] (if (get @state :x-is-next?) "x" "o"))
+                             (swap! state update :x-is-next? not)))
+            winner (calcurate-winner (:squares @state))
             status (if winner
                      (str "Winner:" winner)
                      (str "Next player:" (if (:x-is-next? @state) "x" "o")))]
         [:<>
-         [:div.status status ]
+         [:div.status status]
          [:div.board-row
           [square :value (get-in @state [:squares 0]) :on-click #(handle-click 0)]
           [square :value (get-in @state [:squares 1]) :on-click #(handle-click 1)]
@@ -75,12 +61,8 @@
          [:div.board-row
           [square :value (get-in @state [:squares 6]) :on-click #(handle-click 6)]
           [square :value (get-in @state [:squares 7]) :on-click #(handle-click 7)]
-          [square :value (get-in @state [:squares 8]) :on-click #(handle-click 8)]]])))
-  )
+          [square :value (get-in @state [:squares 8]) :on-click #(handle-click 8)]]]))))
 
 (defn hello []
   [:<>
-   [:p "Hello, react-tutorial is running!"]
-   [:p "Here's an example of using a component with state:"]
-   [click-counter click-count]
    [board]])
