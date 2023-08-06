@@ -60,7 +60,13 @@
              current-squares (last history)
              handle-play (fn [next-squares]
                            (swap! state update :history conj next-squares)
-                           (swap! state update :x-is-next? not))] 
+                           (swap! state update :x-is-next? not))
+             jump-to (fn [next-move])
+             moves (->> history
+                       (map-indexed (fn [idx itm]
+                                      [:li {:key idx}
+                                       [:button {:on-click #(jump-to idx)} "go to move #"  idx]])))
+             ] 
          [:div.game 
           [:div.game-board
            [board 
@@ -68,5 +74,6 @@
             :squares current-squares
             :on-play handle-play]
            [:div.game-info
+            [:ol moves]
             [:div "status"]
             [:ol "todo"]]]]))))
