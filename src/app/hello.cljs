@@ -24,8 +24,8 @@
             first
             (#(squares (first %))))))
 (comment 
-  (calcurate-winner [:o nil nil nil :o nil nil nil :o]) 
-  (calcurate-winner [nil nil nil nil :o nil nil nil :o]))
+  (= :o ( calcurate-winner [:o nil nil nil :o nil nil nil :o])) 
+  (nil? (calcurate-winner [nil nil nil nil :o nil nil nil :o])))
 
 (defn board [& {:keys [x-is-next? squares on-play]}]
   (let [handle-click (fn [i]
@@ -54,19 +54,26 @@
 
 (defn game []
   (let [state (r/atom {:history [(vec (repeat 9 nil))]
-                       :x-is-next? true})]
+                       :x-is-next? true
+                       :current-move 0})]
     (fn []
-       (let [{:keys [history x-is-next?]} @state
-             current-squares (last history)
+       (let [{:keys [history x-is-next? current-move]} @state
+             current-squares (history current-move)
              handle-play (fn [next-squares]
-                           (swap! state update :history conj next-squares)
+                           (let [next-history  (conj (->> history
+                                                          (take (inc current-move))
+                                                          vec)
+                                                     next-squares)]
+                             (swap! state assoc :history next-history)
+                             (swap! state assoc :current-move (-> next-history count dec)))
                            (swap! state update :x-is-next? not))
-             jump-to (fn [next-move])
+             jump-to (fn [next-move]
+                       (swap! state assoc :current-move next-move)
+                       (swap! state assoc :x-is-next? (zero? (mod next-move 2))))
              moves (->> history
-                       (map-indexed (fn [idx itm]
-                                      [:li {:key idx}
-                                       [:button {:on-click #(jump-to idx)} "go to move #"  idx]])))
-             ] 
+                        (map-indexed (fn [idx itm]
+                                       [:li {:key idx}
+                                        [:button {:on-click #(jump-to idx)} "go to move #"  idx]])))] 
          [:div.game 
           [:div.game-board
            [board 
