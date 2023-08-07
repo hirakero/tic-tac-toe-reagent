@@ -28,36 +28,39 @@
   (nil? (calcurate-winner [nil nil nil nil :o nil nil nil :o])))
 
 (defn board [& {:keys [x-is-next? squares on-play]}]
-  (let [handle-click (fn [i]
+  (let [next-player (if x-is-next? "X" "O")
+        handle-click (fn [i]
                        (when-not (or (squares i)
                                      (calcurate-winner squares))
-                         (let [next-squares (assoc squares i (if x-is-next? "X" "O"))]
+                         (let [next-squares (assoc squares i next-player)]
                            (on-play next-squares))))
         winner (calcurate-winner squares)
         status (if winner
                  (str "Winner: " winner)
-                 (str "Next player: " (if x-is-next? "X" "O")))]
+                 (str "Next player: " next-player))
+        render-square (fn[i] 
+                      [square :value (squares i) :on-click #(handle-click i)])]
     [:<>
      [:div.status status]
      [:div.board-row
-      [square :value (squares 0) :on-click #(handle-click 0)]
-      [square :value (squares 1) :on-click #(handle-click 1)]
-      [square :value (squares 2) :on-click #(handle-click 2)]]
+      (render-square 0)
+      (render-square 1)
+      (render-square 2)]
      [:div.board-row
-      [square :value (squares 3) :on-click #(handle-click 3)]
-      [square :value (squares 4) :on-click #(handle-click 4)]
-      [square :value (squares 5) :on-click #(handle-click 5)]]
+      (render-square 3)
+      (render-square 4)
+      (render-square 5)]
      [:div.board-row
-      [square :value (squares 6) :on-click #(handle-click 6)]
-      [square :value (squares 7) :on-click #(handle-click 7)]
-      [square :value (squares 8) :on-click #(handle-click 8)]]]))
+      (render-square 6)
+      (render-square 7)
+      (render-square 8)]]))
 
 (defn game []
   (let [state (r/atom {:history [(vec (repeat 9 nil))]
-                       :x-is-next? true
                        :current-move 0})]
     (fn []
-       (let [{:keys [history x-is-next? current-move]} @state
+       (let [{:keys [history current-move]} @state
+             x-is-next?  (even? current-move)
              current-squares (history current-move)
              handle-play (fn [next-squares]
                            (let [next-history  (conj (->> history
@@ -65,13 +68,11 @@
                                                           vec)
                                                      next-squares)]
                              (swap! state assoc :history next-history)
-                             (swap! state assoc :current-move (-> next-history count dec)))
-                           (swap! state update :x-is-next? not))
+                             (swap! state assoc :current-move (-> next-history count dec))))
              jump-to (fn [next-move]
-                       (swap! state assoc :current-move next-move)
-                       (swap! state assoc :x-is-next? (zero? (mod next-move 2))))
+                       (swap! state assoc :current-move next-move))
              moves (->> history
-                        (map-indexed (fn [idx itm]
+                        (map-indexed (fn [idx _]
                                        [:li {:key idx}
                                         [:button {:on-click #(jump-to idx)} "go to move #"  idx]])))] 
          [:div.game 
@@ -80,7 +81,5 @@
             :x-is-next? x-is-next?
             :squares current-squares
             :on-play handle-play]
-           [:div.game-info
-            [:ol moves]
-            [:div "status"]
-            [:ol "todo"]]]]))))
+           [:div.game-info 
+            [:ol moves]]]]))))
